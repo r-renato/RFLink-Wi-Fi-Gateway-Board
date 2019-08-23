@@ -1,0 +1,15 @@
+{
+  "rflink" : {
+    "protocol" : "http",
+    "host" : "192.168.1.68",
+    "port" : "80",
+    "uri" : "/api/rflink",
+    "apikey" : "4EC7A215FB867244"
+  },
+
+  "bridge" : {
+    "port" : "7373",
+    "polling_mills" : 60000,
+    "reset_minute" : 480
+  }
+}
