@@ -23,7 +23,7 @@
 #define WEB_EMBEDDED            1
 #define DEBUG_WEB_SUPPORT     	1
 #define TELNET_SUPPORT          1
-#define DEBUG_SERIAL_SUPPORT    0
+#define DEBUG_SERIAL_SUPPORT    1
 #define TERMINAL_SUPPORT        1
 #define SYSTEM_CHECK_ENABLED    1
 #define HEARTBEAT_ENABLED       1

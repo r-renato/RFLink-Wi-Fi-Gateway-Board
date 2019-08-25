@@ -151,11 +151,64 @@ Change of connecting port between ATmega2560 and ESP8266 setting the switch to R
 </li>
 <li>
     Connect the power adapter and configure the rflink gateway using the web interface; for more details see the <a href="https://github.com/xoseperez/espurna/wiki/Configuration">ESPurna wiki page</a>.
-</li
+</li>
 </ol>
 
-<h2>Home Assistant integration (Optional)</h2>
+<h2>Home Assistant integration (Optional, lixux systems only)</h2>
+<p align="justify">
+Home Assistant is an open source home automation platform, if you use this platform and do you want interface the RFLink Wi-Fi Gateway then you must follow some simple steps.
+</p>
+<ol>
+<li>
+Copy the folder <strong>home_assistant_rflink_nodejs_bridge</strong> into your Home Assistant system
+</li>
+<li>
+Add to crontab Home Assistant user the following line:
 
+```
+@reboot <script full path>/espurna_rflink_bridge.sh >/dev/null 2>&1
+5 * * * * <script full path>/espurna_rflink_bridge.sh >/dev/null 2>&1
+```
+by replacing <strong>&lt;script full path&gt;</strong> with the real full script path.
+</li>
+<li>
+Configure the NodeJs bridge changing the file <strong>espurna_rflink_bridge.json</strong>
+
+<h5>RFLink gateway properties</h5>
+
+| Attribute name | Default     | Note                                      |
+|----------------|-------------|-------------------------------------------|
+| protocol       | http        | Not change, ESPurna support only http     |
+| host           |             | RFLink device host name or IP Address     |
+| port           | 80          | RFLink device web service port            |
+| uri            | /api/rflink | Not change, RFLink device web service uri |
+| apikey         |             | RFLink device web service api key         |
+
+<h5>NodeJs bridge properties</h5>
+
+| Attribute name | Default | Note                                |
+|----------------|---------|-------------------------------------|
+| port           | 7373    | Bridge local port                   |
+| polling_mills  | 60000   | RFLink Gateway polling time         |
+| reset_minute   | 480     | RFLink Gateway restart command time |
+
+</li>
+<li>
+Configure the Home Assistant RFLink component
+
+```
+rflink:
+  host: localhost
+  port: 7373
+  wait_for_ack: false
+  reconnect_interval: 60
+```
+
+
+
+
+</li>
+</ol>
 
 
 
