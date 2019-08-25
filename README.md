@@ -3,19 +3,19 @@
 <p align="justify">
 The project can help you to build a RFLink Gateway useful to integrate RF devices in your preferred home automation system.
 
-The project core component is the firmware by Stuntteam that permit to sniffing and sending 433 MHz radio frequencies frames, frames organized in accord to specific IOT protocols. The RFLink firmware, developed to be running on the Arduino Mega board, use the platform USB port to communicate, no other communication interfaces are available.
+The project core component is the firmware by Stuntteam that allows sniffing and sending 433 MHz radio frequencies frames. The frames are organized according to specific IOT protocols. The RFLink firmware is developed to run on the Arduino Mega board and it uses the USB port to communicate, no other communication interface is available.
 
-To expose the RFLink Gateway (Arduino board) through Wi-Fi instead of USB, we can use a ESP8266-01 module with installed a customized firmware based on the ESPurna, but adapted to interface the RFLink Gateway. To simplify this integration we will use a customized board containing both Arduino Mega and ESP8266. This board is produced by <a href="https://robotdyn.com">RobotDyn.com</a>.
-The customized firmware, based on ESPurna, will be use to expose the RFLink data through one service web. 
+To expose the RFLink Gateway (Arduino board) through Wi-Fi rather than USB, we can use an ESP8266-01 module.  It is equipped with  a customized firmware based on the ESPurna that is adapted to interface the RFLink Gateway. To simplify this integration we will use a customized board containing both Arduino Mega and ESP8266. This board is produced by RobotDyn.com.
+The customized firmware, based on ESPurna, will be used to expose the RFLink data through a web service.
 
-In the following are shown the hardware and software used, as well as the steps to assemble the gateway.
+In the following, the  use hardware and software are shown, as well as the steps to assemble the gateway.
 </p>
 <h2>Hardware</h2>
 <p>The project is realized using the following hardware:</p>
 <table>
 <thead>
 <tr>
-<th align="left" valign="top"><a href="https://www.nodo-shop.nl/en/rflink-gateway/148-rflink-gateway-components.html" target="_blank">RFLink 433.92 MHz Gateway components</a><br>The components for building a RFlink Gateway (consisting of a 433 MHz Transceiver from Aurel, various type headers, SMA connector and a pcb)</th>
+<th align="left" valign="top"><a href="https://www.nodo-shop.nl/en/rflink-gateway/148-rflink-gateway-components.html" target="_blank">RFLink 433.92 MHz Gateway components</a><br>Components for building a RFlink Gateway: a 433 MHz Transceiver from Aurel, various type headers, SMA connector and a pcb.</th>
 <th align="left" valign="top"><a href="https://www.nodo-shop.nl/en/antennes/12-antenne-sma-voor-nodo.html" target="_blank">Antenna SMA for 433 MHz</a><br>433 MHz antenna</th>
 </tr>
 </thead>
@@ -46,7 +46,7 @@ In the following are shown the hardware and software used, as well as the steps 
 <li>
     <a href="https://github.com/xoseperez/espurna/wiki" target="_blank">ESPurna Firmware for ESP8285/ESP8266</a>
     <br>ESPurna Firmware (Version 1.13.5 is used in this project)
-    <br>NB Is recommended use <a href="https://platformio.org/install" target="_blank">Platformio</a> to build ESPurna customized firmware, for more details see the <a href="https://github.com/xoseperez/espurna/wiki/PlatformIO" target="_blank">ESPurna wiki page</a>
+    <br>NB <a href="https://platformio.org/install" target="_blank">Platformio</a> is recommended to build ESPurna customized firmware, for more details see the <a href="https://github.com/xoseperez/espurna/wiki/PlatformIO" target="_blank">ESPurna wiki page</a>
 </li>
 <li>
     NodeJs rflink bridge for Home Assistant
@@ -122,9 +122,9 @@ extra_scripts = ${common.extra_scripts}
 ```
 ./build.sh generic-robotdyn-atmega2560-esp8266
 ```
-NB Depending on your environment, the build process may be interrupted due to errors. In this cases is enough satisfy the missing dependencies and rerun the build.
+NB Depending on your environment, the build process may be interrupted due to errors. In this cases,it is necessary to satisfy the missing dependencies and rerun the build.
 
-At the successful build end you can found the customized firmware in the folder **firmware/espurna-1.13.5/**
+After the successful build, you can found the customized firmware in the folder **firmware/espurna-1.13.5/**
 </li>
 <li>
     Set the MEGA+WiFi R3 ATmega2560+ESP8266 board dip switch to sketch upload mode
@@ -156,20 +156,20 @@ Change of connecting port between ATmega2560 and ESP8266 setting the switch to R
 
 <h2>Home Assistant integration (Optional, lixux systems only)</h2>
 <p align="justify">
-Home Assistant is an open source home automation platform, if you use this platform and do you want interface the RFLink Wi-Fi Gateway then you must follow some simple steps.
+Home Assistant is an open source home automation platform. If you use this platform and you want to interface the RFLink Wi-Fi Gateway then you must follow some simple steps.
 </p>
 <ol>
 <li>
 Copy the folder <strong>home_assistant_rflink_nodejs_bridge</strong> into your Home Assistant system
 </li>
 <li>
-Add to crontab Home Assistant user the following line:
+Add the following line:
 
 ```
 @reboot <script full path>/espurna_rflink_bridge.sh >/dev/null 2>&1
 5 * * * * <script full path>/espurna_rflink_bridge.sh >/dev/null 2>&1
 ```
-by replacing <strong>&lt;script full path&gt;</strong> with the real full script path.
+to crontab Home Assistant user by replacing <strong>&lt;script full path&gt;</strong> with the real full script path.
 </li>
 <li>
 Configure the NodeJs bridge changing the file <strong>espurna_rflink_bridge.json</strong>
