@@ -167,7 +167,7 @@ Add the following line:
 
 ```
 @reboot <script full path>/espurna_rflink_bridge.sh >/dev/null 2>&1
-5 * * * * <script full path>/espurna_rflink_bridge.sh >/dev/null 2>&1
+*/5 * * * * <script full path>/espurna_rflink_bridge.sh >/dev/null 2>&1
 ```
 to crontab Home Assistant user by replacing <strong>&lt;script full path&gt;</strong> with the real full script path.
 </li>
@@ -203,10 +203,6 @@ rflink:
   wait_for_ack: false
   reconnect_interval: 60
 ```
-
-
-
-
 </li>
 </ol>
 
