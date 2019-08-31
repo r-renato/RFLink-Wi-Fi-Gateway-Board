@@ -154,7 +154,7 @@ Change of connecting port between ATmega2560 and ESP8266 setting the switch to R
 </li>
 </ol>
 
-<h2>Home Assistant integration (Optional, lixux systems only)</h2>
+<h2>Home Assistant integration (Optional, linux systems only)</h2>
 <p align="justify">
 Home Assistant is an open source home automation platform. If you use this platform and you want to interface the RFLink Wi-Fi Gateway then you must follow some simple steps.
 </p>
