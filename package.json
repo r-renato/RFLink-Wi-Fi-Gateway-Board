@@ -1,7 +1,7 @@
 {
   "name": "rflink-wi-fi-gateway-board",
   "displayName": "Build a RFLink Wi-Fi Gateway (Radio Frequency Link Board)",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Build a RFLink Gateway useful to integrate RF devices in your preferred home automation system",
 
   "author": "Renato Rossi https://www.linkedin.com/in/renatorossi/",

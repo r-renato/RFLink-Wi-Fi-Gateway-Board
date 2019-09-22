@@ -165,24 +165,14 @@ Copy the folder <strong>home_assistant_rflink_nodejs_bridge</strong> into your H
 <li>
 Add the following line:
 
-```
+```sh
 @reboot <script full path>/espurna_rflink_bridge.sh >/dev/null 2>&1
-*/5 * * * * <script full path>/espurna_rflink_bridge.sh >/dev/null 2>&1
+*/5 * * * * source <user home>/.bashrc; <script full path>/espurna_rflink_bridge.sh >><user home>/espurna_rflink_bridge.log 2>&1
 ```
 to crontab Home Assistant user by replacing <strong>&lt;script full path&gt;</strong> with the real full script path.
 </li>
 <li>
 Configure the NodeJs bridge changing the file <strong>espurna_rflink_bridge.json</strong>
-
-<h5>RFLink gateway properties</h5>
-
-| Attribute name | Default     | Note                                      |
-|----------------|-------------|-------------------------------------------|
-| protocol       | http        | Not change, ESPurna support only http     |
-| host           |             | RFLink device host name or IP Address     |
-| port           | 80          | RFLink device web service port            |
-| uri            | /api/rflink | Not change, RFLink device web service uri |
-| apikey         |             | RFLink device web service api key         |
 
 <h5>NodeJs bridge properties</h5>
 
@@ -192,8 +182,81 @@ Configure the NodeJs bridge changing the file <strong>espurna_rflink_bridge.json
 | polling_mills  | 60000   | RFLink Gateway polling time         |
 | reset_minute   | 480     | RFLink Gateway restart command time |
 
+<h5>NodeJs RFLink properties for HTTP protocol</h5>
+
+| Attribute name | Default     | Note                                      |
+|----------------|-------------|-------------------------------------------|
+| protocol       | http        | ESPurna support for http                  |
+| host           |             | RFLink device host name or IP Address     |
+| port           | 80          | RFLink device web service port            |
+| uri            | /api/rflink | Not change, RFLink device web service uri |
+| apikey         |             | RFLink device web service api key         |
+
+JSON Examples:
+```json
+{
+  "rflink" : {
+    "protocol" : "http",
+    "host" : "192.168.1.77",
+    "port" : "80",
+    "options" : {
+      "uri": "/api/rflink",
+      "apikey": "7EE7A415EB877244"
+    }
+  },
+
+  "bridge" : {
+    "port" : "7373",
+    "polling_mills" : 60000,
+    "reset_minute" : 480
+  }
+}
+```
+
+<h5>NodeJs RFLink properties for MQTT protocol</h5>
+
+Before use MQTT bridge you must install support library using `npm install mqtt -g`, so add to your user .bashrc `export NODE_PATH=$(npm root -g)`.
+
+| Attribute name | Default     | Note                                                                  |
+|----------------|-------------|-----------------------------------------------------------------------|
+| protocol       | mqtt        | ESPurna support for mqtt                                              |
+| host           |             | MQTT server host                                                      |
+| port           | 1883        | MQTT service port                                                     |
+| username       |             | MQTT credential                                                       |
+| password       |             | MQTT credential                                                       |
+| clientId       |             | MQTT client ID                                                        |
+| clean          |             | MQTT true, set to false to receive QoS 1 and 2 messages while offline |
+| qos            |             | MQTT QoS                                                              |
+| topic          |             | MQTT the topic to publish                                             |
+
+JSON Examples:
+
+```json
+{
+  "rflink" : {
+    "protocol" : "mqtt",
+    "host" : "localhost",
+    "port" : "1883",
+    "options" : {
+      "username" : "rflinkserialbridge",
+      "password" : "password",
+      "clientId" : "rflinkserialbridge",
+      "clean" : "true",
+      "qos": 2,
+      "topic": "rflinkgateway"
+    }
+  },
+
+  "bridge" : {
+    "port" : "7373",
+    "polling_mills" : 60000,
+    "reset_minute" : 480
+  }
+}
+```
 </li>
 <li>
+
 Configure the Home Assistant RFLink component
 
 ```

@@ -20,7 +20,11 @@
 //* component environment enable status key
 #define ROBOTDYN_ATMEGA2560_ESP8266_PREFIX_KEY         "RATM+ESP"
 //* sample plugin MTQQ topic
-#define ROBOTDYN_ATMEGA2560_ESP8266_MQTT_TOPIC          "rflink"
+#define ROBOTDYN_ATMEGA2560_ESP8266_MQTT_TOPIC          "gateway"
+//* sample plugin MTQQ topic
+#define ROBOTDYN_ATMEGA2560_ESP8266_MQTT_COMMAND_TOPIC  "command"
+//* sample plugin REST uri
+#define ROBOTDYN_ATMEGA2560_ESP8266_REST_URI            "rflink"
 //* Sample plugin reporting interval (0 no reporting)
 #define ROBOTDYN_ATMEGA2560_ESP8266_REPORT_EVERY       5
 //* Sample plugin parameter values
@@ -35,7 +39,8 @@ void robotdyn_atmega2560_esp8266Setup();
 //* get plugin enabled state
 bool robotdyn_atmega2560_esp8266Enabled();
 
-class StringTokenizer {
+class StringTokenizer
+{
   public:
     StringTokenizer(String str, String del);
     boolean hasNext();

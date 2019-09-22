@@ -10,11 +10,11 @@
 
 // Disable non-core modules
 #define ALEXA_SUPPORT           0
-#define BROKER_SUPPORT          0
+#define BROKER_SUPPORT          1
 #define DOMOTICZ_SUPPORT        0
 #define HOMEASSISTANT_SUPPORT   0
 #define I2C_SUPPORT             0
-#define MQTT_SUPPORT            0
+#define MQTT_SUPPORT            1
 #define NTP_SUPPORT             1
 #define SCHEDULER_SUPPORT       0
 #define SENSOR_SUPPORT          0
@@ -23,7 +23,7 @@
 #define WEB_EMBEDDED            1
 #define DEBUG_WEB_SUPPORT     	1
 #define TELNET_SUPPORT          1
-#define DEBUG_SERIAL_SUPPORT    1
+#define DEBUG_SERIAL_SUPPORT    0
 #define TERMINAL_SUPPORT        1
 #define SYSTEM_CHECK_ENABLED    1
 #define HEARTBEAT_ENABLED       1

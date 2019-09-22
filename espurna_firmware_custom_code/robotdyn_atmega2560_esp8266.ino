@@ -26,6 +26,7 @@ uint8_t serial_buf[ SERIAL_BUFFER_SIZE ] ;
 size_t bytes_read = 0 ;
 int cnt = 0;
 bool ready = false;
+bool isInPrepareStringBuffer = false ;
 
 static std::queue<String> _serial_queue;
 
@@ -35,6 +36,7 @@ static std::queue<String> _serial_queue;
 
 //* Plugin loop helper function(s)
 //*------------------------------
+
 void serialWriteString(String stringData) { // Used to serially push out a String with Serial.write()
 
   for (int i = 0; i < stringData.length(); i++) {
@@ -44,8 +46,8 @@ void serialWriteString(String stringData) { // Used to serially push out a Strin
 } // end writeString
 
 void prepareStringBuffer( int RXWait ) {
-    if (RXWait == 0)
-        RXWait = 1;
+    isInPrepareStringBuffer = true ;
+    if (RXWait == 0) RXWait = 1;
     int timeOut = RXWait;
     while( timeOut > 0 ) {
         while( Serial.available() ) {
@@ -58,6 +60,19 @@ void prepareStringBuffer( int RXWait ) {
                     bytes_read = 0 ;
 
                     DEBUG_MSG_P(PSTR("[PLUGIN] buffer: %s\r\n"), serial_buf ) ;
+
+                    //* Broker publish
+                    //*-------------
+                    #if BROKER_SUPPORT
+                        brokerPublish(BROKER_MSG_TYPE_SENSOR, ROBOTDYN_ATMEGA2560_ESP8266_MQTT_TOPIC, (char*)serial_buf );
+                        DEBUG_MSG_P(PSTR("[PLUGIN] MQTT message: %s\r\n"), (char*)serial_buf ) ;
+                    #endif
+
+                    //* MQTT publish
+                    //*-------------
+                    #if MQTT_SUPPORT
+                        mqttSend(ROBOTDYN_ATMEGA2560_ESP8266_MQTT_TOPIC, (char*)serial_buf);
+                    #endif
 
                     _serial_queue.push( String((char*)serial_buf) ) ;
                     if( _serial_queue.size() > 20 ) _serial_queue.pop() ;
@@ -72,6 +87,7 @@ void prepareStringBuffer( int RXWait ) {
         delay(1);
         timeOut--;
     }
+    isInPrepareStringBuffer = false ;
 }
 
 void _robotdyn_atmega2560_esp8266_serial_read() {
@@ -100,39 +116,123 @@ void _robotdyn_atmega2560_esp8266_serial_read() {
     //* use this as template to create additional API calls for the plugin
     void _robotdyn_atmega2560_esp8266SetupAPI() {
           char key[15];
-          snprintf_P(key, sizeof(key), PSTR("%s"), ROBOTDYN_ATMEGA2560_ESP8266_MQTT_TOPIC);
+          snprintf_P(key, sizeof(key), PSTR("%s"), ROBOTDYN_ATMEGA2560_ESP8266_REST_URI);
           apiRegister(key,
-            [](char * buffer, size_t len) {
-                String apiResponse = String() ;
-                String row ;
+            [](char * buffer, size_t len) { // GET
+                if( ! isInPrepareStringBuffer ) {
+                    String apiResponse = String() ;
+                    String row ;
 
-                while( !_serial_queue.empty() ) {
-                    row = _serial_queue.front();
-                    apiResponse.concat( row ) ;
-                    _serial_queue.pop();
+                    while( !_serial_queue.empty() ) {
+                        row = _serial_queue.front();
+                        apiResponse.concat( row ) ;
+                        _serial_queue.pop();
+                    }
+
+                    char respBuffer[ apiResponse.length() + 2] ;
+                    apiResponse.toCharArray(respBuffer, apiResponse.length() + 1);
+
+                    DEBUG_MSG_P(PSTR("[PLUGIN1] API len: %d, respBuffer: %d, "), len, sizeof(respBuffer) );
+                    //snprintf_P(buffer, sizeof(buffer), PSTR("Ok - %d"), _pluginCounter);
+                    snprintf_P(buffer, len, PSTR("%s"), respBuffer );
+                    DEBUG_MSG_P(PSTR("return data:\n%s\n"), buffer);
+                } else {
+                    snprintf_P(buffer, len, PSTR("%s"), "" );
+                    DEBUG_MSG_P(PSTR("[PLUGIN1] API NOP") );
                 }
-
-                char respBuffer[ apiResponse.length() + 2] ;
-                apiResponse.toCharArray(respBuffer, apiResponse.length() + 1);
-
-                DEBUG_MSG_P(PSTR("[PLUGIN1] API len: %d respBuffer: %d"), len, sizeof(respBuffer) );
-               //snprintf_P(buffer, sizeof(buffer), PSTR("Ok - %d"), _pluginCounter);
-               snprintf_P(buffer, len, PSTR("%s"), respBuffer );
-               DEBUG_MSG_P(PSTR("[PLUGIN1] API call return:\n %s\n"), buffer);
                },
 
-            [](const char * payload) {
-                   unsigned char value = relayParsePayload(payload);
-                   if (value == 0xFF) {
-                       DEBUG_MSG_P(PSTR("[PLUGIN1] Wrong payload (%s)\n"), payload);
-                       return;
-                   }
-                   _robotdyn_atmega2560_esp8266_enabled = (value == 1);
-                   setSetting(ROBOTDYN_ATMEGA2560_ESP8266_ENABLE_KEY, _robotdyn_atmega2560_esp8266_enabled);
-                   //snprintf_P(buffer, len, PSTR("%d"), _plugin1_enabled ? "ON" : "OFF");
-                   //DEBUG_MSG_P(PSTR("[PLUGIN1] API call return: (%s)\n"), buffer);
-                });
+            [](const char * payload) { // PUT
+
+                if( payload != NULL ) {
+                    String command = String( payload ) ;
+
+                    if( command.startsWith( "10;" ) ) {
+                        DEBUG_MSG_P(PSTR("[PLUGIN1] API PUT value: %s\n"), payload);
+                        command += "\r\n" ;
+                        serialWriteString( command ) ;
+                        Serial.flush();
+                        if( command.startsWith( "10;REBOOT;" ) ) {
+                            _robotdyn_atmega2560_esp8266DebugCounter = 0 ;
+                        }
+                    } else if( command.startsWith( "ON" ) || command.startsWith( "OFF" ) ) {
+                        DEBUG_MSG_P(PSTR("[PLUGIN1] API PUT value: %s\n"), payload);
+                        _robotdyn_atmega2560_esp8266_enabled = command.equals( "ON" ) ;
+                        setSetting(ROBOTDYN_ATMEGA2560_ESP8266_ENABLE_KEY, _robotdyn_atmega2560_esp8266_enabled);
+                    } else {
+                        DEBUG_MSG_P(PSTR("[PLUGIN1] API PUT value: %s is invalid command\n"), payload);
+                    }
+                }
+          });
 	    }
+#endif
+
+#if BROKER_SUPPORT
+    void _pluginBrokerCallback(const unsigned char type, const char * topic, unsigned char id, const char * payload) {
+        DEBUG_MSG_P(PSTR("[PLUGIN1] BROKER topic: %s\n"), topic);
+        // Only process status messages
+        if (BROKER_MSG_TYPE_STATUS != type) return;
+
+        if (strcmp(MQTT_TOPIC_RELAY, topic) == 0) {
+            //ledUpdate(true);
+        }
+
+    }
+
+    void _robotdyn_atmega2560_esp8266SetupBroker() {
+        brokerRegister(_pluginBrokerCallback);
+    }
+#endif // BROKER_SUPPORT
+
+//* If MQTT support needed
+//* MQTT callback handling helper functions
+//*----------------------------------------
+#if MQTT_SUPPORT
+    void _pluginMQTTCallback(unsigned int type, const char * topic, const char * payload) {
+
+        if (type == MQTT_CONNECT_EVENT) {
+            // Subscribe to own /set topic
+            char buffer[strlen(ROBOTDYN_ATMEGA2560_ESP8266_MQTT_COMMAND_TOPIC) + 3];
+            snprintf_P(buffer, sizeof(buffer), PSTR("%s/"), ROBOTDYN_ATMEGA2560_ESP8266_MQTT_COMMAND_TOPIC);
+            DEBUG_MSG_P(PSTR("[PLUGIN] MQTT subscribe topic: %s\n"), buffer);
+            mqttSubscribe( buffer );
+            // Subscribe to group topics
+            //mqttSubscribeRaw(group);
+        }
+        if (type == MQTT_MESSAGE_EVENT) {
+            // manage mtww palyload here
+            String t = mqttMagnitude((char *) topic);
+            // manage group topics code here
+            char respBuffer[ t.length() + 2] ;
+            t.toCharArray(respBuffer, t.length() + 1);
+            DEBUG_MSG_P(PSTR("[PLUGIN] MQTT TOPIC: %s\n"), respBuffer);
+            DEBUG_MSG_P(PSTR("[PLUGIN] MQTT topic: %s\n"), topic);
+
+            String command = String( payload ) ;
+
+            if( t.equals( ROBOTDYN_ATMEGA2560_ESP8266_MQTT_COMMAND_TOPIC ) && command.startsWith( "10;" ) ) {
+                DEBUG_MSG_P(PSTR("[PLUGIN] MQTT PUT value: %s\n"), payload);
+                command += "\r\n" ;
+                serialWriteString( command ) ;
+                Serial.flush();
+                if( command.startsWith( "10;REBOOT;" ) ) {
+                    _robotdyn_atmega2560_esp8266DebugCounter = 0 ;
+                }
+            }
+        }
+
+        if (type == MQTT_DISCONNECT_EVENT) {
+            // MQTT disonnect code here
+        }
+
+//        DEBUG_MSG_P(PSTR("[PLUGIN] MQTT topic: %s\n"), topic);
+//        DEBUG_MSG_P(PSTR("[PLUGIN1] MQTT payload: %s\n"), payload);
+//        DEBUG_MSG_P(PSTR("[PLUGIN1] MQTT type: %i\n"), type);
+      }
+
+      void _robotdyn_atmega2560_esp8266SetupMQTT() {
+          mqttRegister(_pluginMQTTCallback);
+      }
 #endif
 
 //* If terminal Terminal commands needed
@@ -195,15 +295,20 @@ void robotdyn_atmega2560_esp8266Setup() {
 
     //* If MQTT used set up MQTT
     //*-------------------------
-//    #if MQTT_SUPPORT
-//        _pluginSetupMQTT();
-//    #endif
+    #if MQTT_SUPPORT
+        _robotdyn_atmega2560_esp8266SetupMQTT();
+    #endif
+
+    #if BROKER_SUPPORT
+        _robotdyn_atmega2560_esp8266SetupBroker() ;
+    #endif
 
     //* If trminal used set up terminal
     //*-------------------------------
 	  #if TERMINAL_SUPPORT
 	      _pluginInitCommands();
-	  #endif
+      #endif
+
     DEBUG_MSG_P(PSTR("[PLUGIN] Plugin setup code finished \n"));
 }
 //* end of plugin setup

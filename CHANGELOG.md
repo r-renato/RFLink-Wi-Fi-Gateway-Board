@@ -10,5 +10,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+## [1.1.0] Unreleased
+### Added
+- MQTT Client support
+
+
+
 ## [1.0.0] 2019-08-28
 - Initial stable version
