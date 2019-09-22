@@ -1,4 +1,5 @@
 <h1>Build a RFLink Wi-Fi Gateway (Radio Frequency Link Board) <h6>using <i>"Nodo Shop RFLink (433 Mhz) board"</i> and <i>"RobotDyn MEGA+WiFi R3 ATmega2560+ESP8266"</i></h6></h1>
+[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
 
 <p align="justify">
 The project can help you to build a RFLink Gateway useful to integrate RF devices in your preferred home automation system.
@@ -271,7 +272,4 @@ rflink:
 
 
 
-
-
-
-
+[buymecoffee]: https://www.buymeacoffee.com/0D3WbkKrn

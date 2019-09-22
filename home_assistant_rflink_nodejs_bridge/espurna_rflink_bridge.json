@@ -4,7 +4,7 @@
     "host" : "rflink1.lan",
     "port" : "80",
     "uri" : "/api/rflink",
-    "apikey" : "4EC7A215FB867244"
+    "apikey" : "7EE7A415EB877244"
   },
 
   "bridge" : {
