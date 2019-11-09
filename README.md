@@ -121,6 +121,10 @@ build_flags = ${common.build_flags_1m0m} -DUSE_CUSTOM_H
 monitor_speed = ${common.monitor_speed}
 extra_scripts = ${common.extra_scripts}
 ```
+* in the file **platformio.ini**, find ```lib_deps =``` so replace
+```ArduinoJson```
+with
+```https://github.com/bblanchon/ArduinoJson#v5.13.5```
 </li>
 <li>
     Go to in the folder **code/** and build the firmware using the command 
